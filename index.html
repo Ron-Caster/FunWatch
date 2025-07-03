@@ -83,7 +83,7 @@
     <!-- Inline Streaming Player -->
     <div id="playerContainer" class="hidden w-full max-w-6xl mt-8">
       <h2 id="playerTitle" class="text-2xl font-semibold mb-4 text-center"></h2>
-      <iframe id="playerFrame" class="w-full h-[500px] rounded-xl border-0" allowfullscreen></iframe>
+      <iframe id="playerFrame" class="w-full h-[500px] rounded-xl border-0" allowfullscreen sandbox="allow-scripts allow-same-origin"></iframe>
     </div>
 
     <!-- Footer -->
@@ -244,6 +244,21 @@
       prevBtn.disabled = currentPage === 1;
       nextBtn.disabled = currentPage === totalPages;
     }
+
+    // 👇 Extra protection for same-origin iframe popup blocking
+    document.querySelectorAll('iframe').forEach(function (iframe) {
+      iframe.onload = function () {
+        try {
+          iframe.contentWindow.open = function (url, windowName, windowFeatures) {
+            console.warn("Blocked popup from iframe:", url);
+            alert("Popup blocked from iframe:\n" + url);
+            return null;
+          };
+        } catch (e) {
+          console.warn("Cross-origin iframe. Cannot override window.open");
+        }
+      };
+    });
 
     // Initial Load
     fetchMovies();
